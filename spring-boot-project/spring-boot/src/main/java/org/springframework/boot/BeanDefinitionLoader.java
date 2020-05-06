@@ -78,12 +78,16 @@ class BeanDefinitionLoader {
 	BeanDefinitionLoader(BeanDefinitionRegistry registry, Object... sources) {
 		Assert.notNull(registry, "Registry must not be null");
 		Assert.notEmpty(sources, "Sources must not be empty");
+
 		this.sources = sources;
+		//读取注释
 		this.annotatedReader = new AnnotatedBeanDefinitionReader(registry);
+		//读取xml
 		this.xmlReader = new XmlBeanDefinitionReader(registry);
 		if (isGroovyPresent()) {
 			this.groovyReader = new GroovyBeanDefinitionReader(registry);
 		}
+		//读取classpath
 		this.scanner = new ClassPathBeanDefinitionScanner(registry);
 		this.scanner.addExcludeFilter(new ClassExcludeFilter(sources));
 	}
@@ -273,9 +277,11 @@ class BeanDefinitionLoader {
 		return Package.getPackage(source.toString());
 	}
 
+	//TODO sanpy 这里还不是能看懂
 	private boolean isComponent(Class<?> type) {
 		// This has to be a bit of a guess. The only way to be sure that this type is
 		// eligible is to make a bean definition out of it and try to instantiate it.
+		//MergedAnnotations对type的超类以及实现的接口整个层次进行搜索，查找是否出现Component.class注解
 		if (MergedAnnotations.from(type, SearchStrategy.TYPE_HIERARCHY).isPresent(Component.class)) {
 			return true;
 		}
