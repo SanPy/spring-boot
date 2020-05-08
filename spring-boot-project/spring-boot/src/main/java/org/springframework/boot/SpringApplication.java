@@ -384,9 +384,17 @@ public class SpringApplication {
 			ApplicationArguments applicationArguments) {
 		// Create and configure the environment
 		ConfigurableEnvironment environment = getOrCreateEnvironment();
+
+		//初始化properties和profiles
 		configureEnvironment(environment, applicationArguments.getSourceArgs());
+
+		//TODO sanpy 暂时还不明白
 		ConfigurationPropertySources.attach(environment);
+
+		//通知环境已经准备好了
 		listeners.environmentPrepared(environment);
+
+		//从方法名来看，应该是将环境绑定到SpringApplication
 		bindToSpringApplication(environment);
 		if (!this.isCustomEnvironment) {
 			environment = new EnvironmentConverter(getClassLoader()).convertEnvironmentIfNecessary(environment,
@@ -430,6 +438,8 @@ public class SpringApplication {
 		}
 		// Add boot specific singleton beans
 		/**
+		 *
+		 *  典型的使用方式是，在访问bean之前，首先会注册所有的bean定义（bean定义可能来源于一个bean定义文件）
 		 *  {@link org.springframework.beans.factory.support.DefaultListableBeanFactory}              }
 		 */
 		ConfigurableListableBeanFactory beanFactory = context.getBeanFactory();
@@ -443,7 +453,6 @@ public class SpringApplication {
 		}
 
 
-
 		if (beanFactory instanceof DefaultListableBeanFactory) {
 			//设置已经注册的bean是否可以通过相同的名称进行覆盖
 			((DefaultListableBeanFactory) beanFactory)
@@ -452,6 +461,7 @@ public class SpringApplication {
 
 		//可能跟懒加载有关系
 		if (this.lazyInitialization) {
+			//设置懒加载模式
 			context.addBeanFactoryPostProcessor(new LazyInitializationBeanFactoryPostProcessor());
 		}
 		// Load the sources
@@ -546,11 +556,15 @@ public class SpringApplication {
 	 * @see #configurePropertySources(ConfigurableEnvironment, String[])
 	 */
 	protected void configureEnvironment(ConfigurableEnvironment environment, String[] args) {
+		//转换服务
 		if (this.addConversionService) {
+			//转换服务，例如http请求中字符类型转成java类型
 			ConversionService conversionService = ApplicationConversionService.getSharedInstance();
 			environment.setConversionService((ConfigurableConversionService) conversionService);
 		}
+		//添加初始的properties（注意：当前并未加载如application.properties/yml的properties）
 		configurePropertySources(environment, args);
+		//添加初始的profile（注意：当前并未加载如application.properties/yml配置profile）
 		configureProfiles(environment, args);
 	}
 
@@ -751,6 +765,7 @@ public class SpringApplication {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Loading source " + StringUtils.arrayToCommaDelimitedString(sources));
 		}
+		//Bean定义加载器，主要就是用来从各个来源加载bean定义
 		BeanDefinitionLoader loader = createBeanDefinitionLoader(getBeanDefinitionRegistry(context), sources);
 		if (this.beanNameGenerator != null) {
 			loader.setBeanNameGenerator(this.beanNameGenerator);
@@ -1198,6 +1213,7 @@ public class SpringApplication {
 		if (!CollectionUtils.isEmpty(this.sources)) {
 			allSources.addAll(this.sources);
 		}
+		//返回一个不能修改的集合
 		return Collections.unmodifiableSet(allSources);
 	}
 

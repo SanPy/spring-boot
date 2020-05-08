@@ -89,6 +89,8 @@ class BeanDefinitionLoader {
 		}
 		//读取classpath
 		this.scanner = new ClassPathBeanDefinitionScanner(registry);
+
+		//排除过滤器
 		this.scanner.addExcludeFilter(new ClassExcludeFilter(sources));
 	}
 
